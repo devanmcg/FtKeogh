@@ -5,13 +5,23 @@ FtK <-
           'boundary_ftkeogh') %>%
   st_transform(26913)
 
-ftk_dem <- read_stars('S:/DevanMcG/GIS/SpatialData/FtKeogh/DEM/USGS_1_n47w106.tif') %>%
-            st_transform(26913) %>%
-              st_crop(FtK)
+dem <- 
+  FtK  %>%
+  as_Spatial()  %>%
+  elevatr::get_elev_raster(z = 13, 
+                           clip = 'bbox', 
+                           verbose = F, 
+                           override_size_check = T) 
+# raster::writeRaster(dem, './SpatialData/DEM/dem.tif')
 
+ftk_dem <- read_stars('./SpatialData/DEM/dem.tif') 
+
+slope %>%
+  filter(slope <= 0.02) %>%
 ggplot( ) + theme_bw() +
-  geom_stars(data =  ftk_dem) +
-  coord_equal() +
-  scale_fill_viridis_c("tree cover") +
-  scale_x_discrete(expand = c(0, 0)) +
-  scale_y_discrete(expand = c(0, 0))
+  geom_stars( ) 
+
+st_as_stars(slope)
+
+slope <- terra::terrain(dem, 'slope') 
+# raster::writeRaster(slope, './SpatialData/DEM/slope.tif')
