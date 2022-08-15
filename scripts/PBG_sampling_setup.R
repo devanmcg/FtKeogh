@@ -66,31 +66,37 @@ trt <-
   select(trt) %>%
   st_transform(st_crs(plots))
 
-PatchSites <- 
+patches <- 
   read_sf('./SpatialData/PatchBurning/Patches', 
-          'DomSites') %>%
-  select(-musym, -area) %>%
-  st_intersection(trt)
+          'patches') %>%
+  select(-acres, -id) %>%
+  arrange(pasture) %>%
+  group_by(pasture) %>%
+  mutate(patch = seq(1, n(), 1)) %>%
+  ungroup() %>%
+  select(trt, pasture, patch, BurnYr)
 
-longFRIplots <-
+FRI6plots <-
   plots %>%
     select(-id) %>%
-    st_intersection(PatchSites) %>%
+    st_intersection(patches) %>%
     filter(trt == '6') %>%
     arrange(pasture, patch) %>%
-    mutate(id = seq(1, n(), 1)) 
+    mutate(id = seq(1, n(), 1)) %>%    
+  rename(plot = id) %>%
+  select(pasture, patch, plot, BurnYr)
 
-longFRIppoints <-
-  longFRIplots %>%
+st_write(FRI6plots, './SpatialData/PatchBurning/Sampling/FRI6plots.shp', append = FALSE, delete_layer = TRUE)
+
+FRI6points <-
+  FRI6plots %>%
     st_cast("MULTIPOINT") %>%
     st_cast('POINT') %>%
-    rename(plot = id) %>% 
     group_by(plot) %>%
+    slice(1:4) %>%
     mutate(point = LETTERS[1:n()]) %>%
-  select(pasture, plot, point, )
+  ungroup() %>% 
+  select(pasture, patch, plot, point, BurnYr) 
 
+st_write(FRI6points, './SpatialData/PatchBurning/Sampling/FRI6points.shp', append = FALSE, delete_layer = TRUE)
 
-  ggplot() + theme_bw(14) + 
-  geom_sf( ) +
-  geom_sf(data = filter(patches, trt == '6'),
-          fill= NA) 
