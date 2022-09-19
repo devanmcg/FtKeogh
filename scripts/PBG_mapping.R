@@ -2,10 +2,58 @@ pacman::p_load(tidyverse, sf, stars)
 pacman::p_load_gh('devanmcg/wesanderson')
 source('https://raw.githubusercontent.com/devanmcg/rangeR/master/R/CustomGGplotThemes.R')
 
+gp <- 
+  read_sf('S:/DevanMcG/GIS/SpatialData/US/EPAecoregions/L3', 
+          'us_eco_l3_state_boundaries') %>%
+  filter(NA_L1CODE == "9") %>%
+  st_union() 
 
-ftk_sf <- read_sf('./SpatialData/boundary', 
-                  'boundary_ftkeogh_LL') %>% 
-  st_transform(26913) 
+nwgp <- 
+  read_sf('S:/DevanMcG/GIS/SpatialData/US/EPAecoregions/L3', 
+          'us_eco_l3_state_boundaries') %>%
+    filter(US_L3CODE == "43")
+
+
+usa <- read_sf('S:/DevanMcG/GIS/SpatialData/NaturalEarth', 
+                 "ne_10m_admin_1_states_provinces_lakes")  %>%
+  filter(iso_a2 == "US", 
+         ! name %in% c('Alaska', 'Hawaii'))  %>%
+  st_transform(st_crs(nwgp))
+
+region_states <- 
+  read_sf('S:/DevanMcG/GIS/SpatialData/NaturalEarth', 
+               "ne_10m_admin_1_states_provinces_lakes")  %>%
+  filter(iso_a2 == "US", 
+         name %in% c('Montana', 'North Dakota', 'South Dakota', 'Wyoming'))  %>%
+  st_transform(st_crs(nwgp))
+
+ftk <- read_sf('C:/Users/devan.mcgranahan/GithubProjects/FtKeogh/SpatialData/boundary', 
+               'boundary_ftkeogh_LL')%>%
+  st_transform(st_crs(nwgp))
+
+ggplot() + theme_map() +
+  geom_sf(data = region_states, fill = wes_palette('Zissou1')[2])  + 
+  geom_sf(data = mt, fill = wes_palette('Zissou1')[4]) + 
+  geom_sf(data = nwgp, fill = wes_palette('Zissou1')[5]) + 
+  geom_sf(data =ftk,  fill = wes_palette('Zissou1')[3]) +
+  geom_sf(data = gp, fill = NA, color = 'white')
+
+ggplot() + theme_bw() +
+  geom_sf(data = usa, fill = 'white', color = 'lightgrey')  + 
+  geom_sf(data = nwgp, fill = wes_palette('Zissou1')[2]) +
+  geom_sf(data = gp, fill = NA, color = 'white')
+
+
+grid.newpage() 
+main <- viewport(width = 1, height = 0.95, x = 0.5, y = 0.5) 
+TL <- viewport(width = 0.33, height = 0.5, x = 0.15, y = 0.7)
+print(MainMap, vp = main)
+print(wc_rp, vp = TL)
+dev.off() 
+
+
+
+
 
 prod_d <- 
   readxl::read_xlsx('./PastureStocking/RangeProd.xlsx', 
