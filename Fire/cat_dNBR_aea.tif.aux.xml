@@ -1,0 +1,12 @@
+<PAMDataset>
+  <PAMRasterBand band="1">
+    <CategoryNames>
+      <Category></Category>
+      <Category>NA</Category>
+      <Category>low</Category>
+      <Category>med</Category>
+      <Category>high</Category>
+      <Category>very high</Category>
+    </CategoryNames>
+  </PAMRasterBand>
+</PAMDataset>
